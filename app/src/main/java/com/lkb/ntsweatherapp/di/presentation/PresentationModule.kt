@@ -2,9 +2,9 @@ package com.lkb.ntsweatherapp.di.presentation
 
 import android.app.Activity
 import android.view.LayoutInflater
-import com.lkb.ntsweatherapp.model.Repositiory
-import com.lkb.ntsweatherapp.model.network.WeatherApiService
-import com.lkb.ntsweatherapp.model.network.forcasts.ForecastUseCase
+import com.lkb.ntsweatherapp.model.Repository
+import com.lkb.ntsweatherapp.network.WeatherApiService
+import com.lkb.ntsweatherapp.network.forcasts.WeatherUseCase
 import com.lkb.ntsweatherapp.view.common.BaseActivity
 import com.lkb.ntsweatherapp.view.weather.MyAdapter
 import dagger.Module
@@ -30,14 +30,14 @@ class PresentationModule(baseActivity: BaseActivity) {
     }
 
     @Provides
-    fun getForcastUseCase(weatherApiService: WeatherApiService): ForecastUseCase {
-        return ForecastUseCase(weatherApiService)
+    fun getForcastUseCase(weatherApiService: WeatherApiService): WeatherUseCase {
+        return WeatherUseCase(weatherApiService)
     }
 
 
     @Provides
-    fun getRepository(mForecastUseCase: ForecastUseCase): Repositiory {
-        return Repositiory(mForecastUseCase)
+    fun getRepository(mWeatherUseCase: WeatherUseCase): Repository {
+        return Repository(mWeatherUseCase)
     }
 
     @Provides

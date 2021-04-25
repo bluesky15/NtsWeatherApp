@@ -6,13 +6,24 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.lkb.ntsweatherapp.R
-import com.lkb.ntsweatherapp.model.WeatherModel
-
-import java.text.SimpleDateFormat
 
 class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
+    interface OnItemClickListener {
+        fun onCityClicked(city: String)
+    }
 
-    var mListData: List<WeatherModel.Forecastday> = ArrayList()
+    private var listener: OnItemClickListener? = null
+    private var mListData: List<String> = listOf(
+        "Pune",
+        "Bengaluru",
+        "Kolkata",
+        "Goa",
+        "Chennai",
+        "Bhubaneswar",
+        "Puri",
+        "Visakhapatnam"
+    )
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.weather_forecast_list_item, parent, false)
@@ -25,21 +36,18 @@ class MyAdapter() : RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val pattern = "yyyy-mm-dd"
-        val simpleDateFormat = SimpleDateFormat(pattern)
-        val date = simpleDateFormat.parse(mListData[position].date)
-        holder.mDayTxt.text = date.toString().split(" ")[0]
-        holder.mTempTxt.text = mListData[position].day.maxtemp_c.toString()
-    }
-
-    fun bindData(data: WeatherModel.WeatherApiResponse) {
-        mListData = data.forecast.forecastday
-        notifyDataSetChanged()
+        holder.mDayTxt.rootView.setOnClickListener {
+            listener?.onCityClicked(holder.mDayTxt.text.toString())
+        }
+        holder.mDayTxt.text = mListData[position]
     }
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var mDayTxt: TextView = itemView.findViewById(R.id.txtDay)
-        var mTempTxt: TextView = itemView.findViewById(R.id.txtTemp)
+    }
+
+    fun setListenerInstance(listener: OnItemClickListener) {
+        this.listener = listener
     }
 
 

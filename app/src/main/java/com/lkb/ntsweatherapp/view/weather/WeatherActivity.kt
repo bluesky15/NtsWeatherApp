@@ -3,19 +3,17 @@ package com.lkb.ntsweatherapp.view.weather
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.lkb.ntsweatherapp.Constants
 import com.lkb.ntsweatherapp.R
-import com.lkb.ntsweatherapp.model.WeatherModel
+import com.lkb.ntsweatherapp.model.data.WeatherResponse
 import com.lkb.ntsweatherapp.view.common.BaseActivity
 import com.lkb.ntsweatherapp.viewmodel.ViewModelFactory
 import com.lkb.ntsweatherapp.viewmodel.weather.WeatherViewModel
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.weather_main.*
 import javax.inject.Inject
 
-class WeatherActivity : BaseActivity() {
+class WeatherActivity : BaseActivity(), MyAdapter.OnItemClickListener {
 
     @Inject
     lateinit var adapter: MyAdapter
@@ -38,13 +36,14 @@ class WeatherActivity : BaseActivity() {
             androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
             false
         )
+        adapter.setListenerInstance(this)
         recycler.adapter = adapter
     }
 
 
     override fun onStart() {
         super.onStart()
-        mViewModel = ViewModelProviders.of(this,mViewModelFactory)
+        mViewModel = ViewModelProvider(this,mViewModelFactory)
             .get(WeatherViewModel::class.java)
     }
 
@@ -55,27 +54,22 @@ class WeatherActivity : BaseActivity() {
     }
 
     private fun bindWeatherData() {
-        if (mViewModel.mWeatherData == null) {
-            mViewModel.callWeatherApi(Constants.WEATHER_API_KEY, "Bangalore", 7)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe {
-                    adapter.bindData(it)
-                    mViewModel!!.mWeatherData = it
-                    initUi(it)
-                }
-        } else {
-            adapter.bindData(mViewModel.mWeatherData!!)
-            initUi(mViewModel.mWeatherData!!)
-        }
+            mViewModel.callWeather("hyderabad","Metric",Constants.WEATHER_API_KEY)
+            mViewModel.mWeatherData.observe(this,{
+                initUi(it)
+            })
     }
-    private fun initUi(data: WeatherModel.WeatherApiResponse) {
-        temparatureTxt.text = data.current.temp_c.toString()
-        locationTxt.text = data.location.name
+    private fun initUi(data: WeatherResponse.WeatherData) {
+        temparatureTxt.text = data.main.temp.toString()
+        locationTxt.text = data.name
         progressBar.visibility = View.GONE
         locationTxt.visibility = View.VISIBLE
         temparatureTxt.visibility = View.VISIBLE
         degreeImage.visibility = View.VISIBLE
+    }
+
+    override fun onCityClicked(city: String) {
+        mViewModel.callWeather(city,"Metric",Constants.WEATHER_API_KEY)
     }
 
 }
